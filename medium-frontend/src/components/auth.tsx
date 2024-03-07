@@ -1,13 +1,26 @@
 import { ChangeEvent, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { SignupInput } from "../assets/zod"
-
+import axios from "axios"
+import {BACKEND_URL} from '../assets/config';
 export const Auth =({type}:{type:"signup"|"signin"})=>{
+    const navigate = useNavigate();
     const [postInputs,setPostInputs] = useState<SignupInput>({
         email:"",
         password:"",
         name:""
     });
+    async function sendRequest(){
+        try{
+            const res= await axios.post(`${BACKEND_URL}/api/v1/user/${type=='signin'?"signin":"signup"}`, postInputs);
+            const jwt = res.data;
+            localStorage.setItem('token',jwt);
+            navigate("/blogs");
+        } catch(e){
+            console.log(e);
+        }
+    
+    }
     return <div className="h-screen flex justify-center flex-col">
             <div className="flex justify-center">
                 <div>
@@ -23,12 +36,12 @@ export const Auth =({type}:{type:"signup"|"signin"})=>{
                         </div>
                     </div>
                     <div>
-                        <LabelledInputBox label="Name" placeholder="TrynaCode" onChange={(e)=>{
+                        {type=="signup"? <LabelledInputBox label="Name" placeholder="TrynaCode" onChange={(e)=>{
                             setPostInputs(c=>({
                                 ...c,
                                 name:e.target.value
                             }))
-                        }}/>
+                        }}/>: null}
                         <LabelledInputBox label="Email" placeholder="mediumFan@whatevermail.com" onChange={(e)=>{
                             setPostInputs(c=>({
                                 ...c,
@@ -41,13 +54,12 @@ export const Auth =({type}:{type:"signup"|"signin"})=>{
                                 password:e.target.value
                             }))
                         }}/>
-                        <button type="button" className="mt-8 w-full focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ">{type==="signup"? "Sign up":"Sign in"}</button>
+                        <button onClick={sendRequest} type="button" className="mt-8 w-full focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 ">{type==="signup"? "Sign up":"Sign in"}</button>
                     </div>
                 </div>
             </div>
     </div>
 }
-
 //fancy inputs that I painstakingly made I deserve some cookie points on this
 interface LabelledInputTypes{
     label: string,
