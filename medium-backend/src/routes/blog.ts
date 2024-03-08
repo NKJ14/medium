@@ -93,7 +93,18 @@ blogRouter.post('/create', async (c) => {
         datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
     try{
-        const posts = await prisma.post.findMany({});
+        const posts = await prisma.post.findMany({
+            select:{
+                content:true,
+                title:true,
+                id:true,
+                author:{
+                    select:{
+                        name:true
+                    }
+                }
+            }
+        });
         return c.json({
             posts
         })
